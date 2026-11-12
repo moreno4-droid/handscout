@@ -1,0 +1,30 @@
+name: Datenimport in die Datenbank
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '23 4 * * *'
+permissions:
+  contents: read
+  actions: write
+concurrency: import-db
+jobs:
+  import:
+    runs-on: ubuntu-latest
+    timeout-minutes: 345
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22 }
+      - name: Spiele der letzten 5 Saisons von handball.ch in die Datenbank schreiben
+        id: imp
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
+          MAX_MINUTEN: "300"
+          MAX_SAISONS: "5"
+        run: node scripts/import-db.mjs
+      - name: Weitermachen, falls noch nicht alles geladen ist
+        if: steps.imp.outputs.unfertig == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh workflow run import-db.yml
