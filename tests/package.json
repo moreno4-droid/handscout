@@ -1,0 +1,10 @@
+{
+  "name": "handscout-tests",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node test-db.mjs && node test-last.mjs && node e2e.mjs"
+  },
+  "dependencies": { "@electric-sql/pglite": "^0.2.0" },
+  "devDependencies": { "playwright": "^1.45.0" }
+}
